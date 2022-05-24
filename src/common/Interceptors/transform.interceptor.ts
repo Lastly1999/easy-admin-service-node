@@ -14,7 +14,7 @@ export class TransformInterceptor<T> implements NestInterceptor<T, Response<T>> 
     const timestamp = new Date().toISOString();
     return next.handle().pipe(
       map((data) => {
-        const requestData = { data: data, statusCode: 200, message: 'ok', timestamp, url };
+        const requestData = { statusCode: 200, message: 'ok', timestamp, url, data };
         Logger.log(JSON.stringify(requestData), 'RequestInterception');
         return requestData;
       }),

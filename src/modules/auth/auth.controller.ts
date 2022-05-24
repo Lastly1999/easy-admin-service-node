@@ -1,4 +1,4 @@
-import { Body, Controller, Post } from '@nestjs/common';
+import { Body, Controller, Get, Post } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { FindUserDto } from './dto/find-user.dto';
 
@@ -8,5 +8,9 @@ export class AuthController {
   @Post('/login')
   async loginAction(@Body() findUserDto: FindUserDto) {
     return this.authService.getUser(findUserDto);
+  }
+  @Get('/captcha')
+  async getCaptcha() {
+    return this.authService.generateCaptcha();
   }
 }
