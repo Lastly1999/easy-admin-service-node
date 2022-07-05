@@ -2,7 +2,7 @@ export default () => ({
     port: 3000,
     database: {
         type: 'mysql',
-        host: 'rm-wz94k0l69605b622nwo.mysql.rds.aliyuncs.com',
+        host: '81.69.196.144',
         port: 3306,
         username: 'root',
         password: 'Chen1027',

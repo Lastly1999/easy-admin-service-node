@@ -4,6 +4,8 @@ import { UserEntity } from '../../../entity/user.entity';
 import { FindUserDto } from '../auth/dto/find-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { CreateUserDto } from './dto/create-user.dto';
+import { RegisterUserDto } from './dto/register-user.dto';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class UserService {
@@ -11,6 +13,29 @@ export class UserService {
         @InjectRepository(UserEntity)
         private readonly userRepository: Repository<UserEntity>,
     ) {}
+
+    /**
+     * 用户注册
+     * @param registerUserDto
+     */
+    async registerUser(registerUserDto: RegisterUserDto) {
+        const saltOrRounds = 10;
+        const hashPassWord = await bcrypt.hash(registerUserDto.passWord, saltOrRounds);
+        await this.userRepository
+            .createQueryBuilder()
+            .insert()
+            .into(UserEntity)
+            .values([
+                {
+                    userName: registerUserDto.userName,
+                    passWord: hashPassWord,
+                    email: registerUserDto.email,
+                    nikeName: registerUserDto.nikeName,
+                },
+            ])
+            .execute();
+        return null;
+    }
 
     /**
      * 查询用户

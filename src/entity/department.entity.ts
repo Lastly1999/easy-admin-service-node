@@ -2,7 +2,7 @@ import { Column, CreateDateColumn, DeleteDateColumn, Entity, ManyToMany, Primary
 import { UserEntity } from './user.entity';
 
 @Entity({ name: 'sys_department' })
-export class DepartmentEntitynt {
+export class DepartmentEntity {
     @PrimaryGeneratedColumn()
     id: number;
     @Column()

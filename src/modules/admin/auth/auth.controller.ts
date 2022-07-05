@@ -10,7 +10,7 @@ export class AuthController {
 
     @Post('/login')
     async loginAction(@Body() findUserDto: FindUserDto) {
-        return this.authService.getUser(findUserDto);
+        return this.authService.validateUser(findUserDto);
     }
     @Get('/captcha')
     async getCaptcha() {

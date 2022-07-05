@@ -1,22 +1,43 @@
 import { CACHE_MANAGER, HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common';
 import { Cache } from 'cache-manager';
 import { FindUserDto } from './dto/find-user.dto';
-import { UserService } from '../user/user.service';
 import * as svgCaptcha from 'svg-captcha';
 import { ConfigService } from '@nestjs/config';
 import { AuthRedisConstant } from './auth-redis.constant';
+import { InjectRepository } from '@nestjs/typeorm';
+import { UserEntity } from '../../../entity/user.entity';
+import { Repository } from 'typeorm';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class AuthService {
-    constructor(private readonly userService: UserService, private readonly configService: ConfigService, @Inject(CACHE_MANAGER) private cacheManager: Cache) {}
+    constructor(
+        @InjectRepository(UserEntity)
+        private readonly userRepository: Repository<UserEntity>,
+        @Inject(CACHE_MANAGER) private cacheManager: Cache,
+        private readonly configService: ConfigService,
+    ) {}
 
     /**
-     * 验证用户是否存在
+     * 验证用户信息
      * @param findUserDto
      */
-    async getUser(findUserDto: FindUserDto) {
-        await this.userService.getUser(findUserDto);
-        return null;
+    async validateUser(findUserDto: FindUserDto): Promise<any> {
+        const user = await this.userRepository
+            .createQueryBuilder('user')
+            .where('user.userName = :userName', {
+                userName: findUserDto.userName,
+            })
+            .andWhere('user.passWord = :passWord', {
+                passWord: findUserDto.passWord,
+            })
+            .getOne();
+        const hasExistUser = user && (await bcrypt.compare(findUserDto.passWord, user.passWord));
+        if (hasExistUser) {
+            return user;
+        } else {
+            throw new HttpException('登录失败', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
     /**
@@ -28,7 +49,8 @@ export class AuthService {
             const captcha = svgCaptcha.createMathExpr({ ...this.configService.get('svgcaptcha') });
             // svg转换为base64编码
             const captchaBase64 = Buffer.from(captcha.data).toString('base64');
-            await this.cacheManager.set('adjasjdjad', captcha.text, { ttl: 50000 });
+            // 设置验证码缓存 3分钟过期
+            await this.cacheManager.set(AuthRedisConstant.CAPTCHA_PREFIX, captcha.text, { ttl: 300 });
             return {
                 captchaBase64,
                 captchaId: captcha.text,
