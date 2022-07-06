@@ -8,6 +8,8 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { UserEntity } from '../../../entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
+import { JwtService } from '@nestjs/jwt';
+import { JwtConstant } from './jwt.constant';
 
 @Injectable()
 export class AuthService {
@@ -16,34 +18,32 @@ export class AuthService {
         private readonly userRepository: Repository<UserEntity>,
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private readonly configService: ConfigService,
+        private readonly jwtService: JwtService,
     ) {}
 
     /**
      * 验证用户信息
      * @param findUserDto
      */
-    async validateUser(findUserDto: FindUserDto): Promise<any> {
-        const user = await this.userRepository
-            .createQueryBuilder('user')
-            .where('user.userName = :userName', {
+    public async validateUser(findUserDto: FindUserDto): Promise<any> {
+        const user = await this.userRepository.findOne({
+            where: {
                 userName: findUserDto.userName,
-            })
-            .andWhere('user.passWord = :passWord', {
-                passWord: findUserDto.passWord,
-            })
-            .getOne();
+            },
+        });
         const hasExistUser = user && (await bcrypt.compare(findUserDto.passWord, user.passWord));
         if (hasExistUser) {
-            return user;
+            const token = this.generateToken({ id: user.id });
+            return { token, userInfo: user };
         } else {
-            throw new HttpException('登录失败', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException('登录失败,请检查s用户名或密码是否正确', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     /**
      * 生成图形验证码
      */
-    async generateCaptcha() {
+    public async generateCaptcha() {
         try {
             // 创建图形验证码
             const captcha = svgCaptcha.createMathExpr({ ...this.configService.get('svgcaptcha') });
@@ -58,5 +58,41 @@ export class AuthService {
         } catch (err) {
             throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * 生成token
+     */
+    public generateToken(payload: any) {
+        const accessToken = `Bearer ${this.jwtService.sign(payload)}`;
+        const refreshToken = this.jwtService.sign(payload, {
+            expiresIn: '30m',
+        });
+        return {
+            accessToken,
+            refreshToken,
+        };
+    }
+
+    /**
+     * token验证
+     * @param token 0为验证成功返回token的id
+     */
+    public verifyToken(token: string): number {
+        try {
+            if (!token) return 0;
+            const id = this.jwtService.verify(token.replace('Bearer ', ''));
+            return id;
+        } catch (e) {
+            return 0;
+        }
+    }
+
+    /**
+     * 根据JWT解析的ID校验用户
+     * @param payload
+     */
+    public async validateUserByJwt(payload: { id: number }): Promise<UserEntity> {
+        return await this.userRepository.findOne({ where: { id: payload.id } });
     }
 }

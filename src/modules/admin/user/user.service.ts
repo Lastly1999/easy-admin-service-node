@@ -18,9 +18,18 @@ export class UserService {
      * 用户注册
      * @param registerUserDto
      */
-    async registerUser(registerUserDto: RegisterUserDto) {
+    public async registerUser(registerUserDto: RegisterUserDto) {
+        // 用户存在查询
+        const existUser = await this.userRepository.findOne({
+            where: {
+                userName: registerUserDto.userName,
+            },
+        });
+        if (existUser) throw new HttpException('用户已存在', HttpStatus.OK);
+        // 开始生成账户
         const saltOrRounds = 10;
         const hashPassWord = await bcrypt.hash(registerUserDto.passWord, saltOrRounds);
+        // 插入
         await this.userRepository
             .createQueryBuilder()
             .insert()
@@ -41,7 +50,7 @@ export class UserService {
      * 查询用户
      * @param findUserDto
      */
-    async getUser(findUserDto: FindUserDto) {
+    public async getUser(findUserDto: FindUserDto) {
         const userInfo = await this.userRepository
             .createQueryBuilder('user')
             .where('user.userName = :userName', {
@@ -61,7 +70,7 @@ export class UserService {
      * 新增用户
      * @param createUserDto
      */
-    async addUser(createUserDto: CreateUserDto) {
+    public async addUser(createUserDto: CreateUserDto) {
         return await this.userRepository
             .createQueryBuilder('user')
             .insert()
@@ -73,5 +82,15 @@ export class UserService {
                 nikeName: createUserDto.nikeName,
             })
             .execute();
+    }
+
+    /**
+     * 查询用户信息 (userId)
+     * @param id
+     */
+    public async findById(id: number) {
+        return await this.userRepository.findOne({
+            where: { id },
+        });
     }
 }

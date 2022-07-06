@@ -12,6 +12,6 @@ async function bootstrap() {
     app.useGlobalInterceptors(new TransformInterceptor());
     app.useGlobalFilters(new HttpExceptionFilter());
     await setupSwagger(app);
-    await app.listen(10086);
+    await app.listen(5000);
 }
 bootstrap();

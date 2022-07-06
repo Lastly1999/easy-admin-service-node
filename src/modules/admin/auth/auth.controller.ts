@@ -9,11 +9,11 @@ export class AuthController {
     constructor(private readonly authService: AuthService) {}
 
     @Post('/login')
-    async loginAction(@Body() findUserDto: FindUserDto) {
+    public async loginAction(@Body() findUserDto: FindUserDto) {
         return this.authService.validateUser(findUserDto);
     }
     @Get('/captcha')
-    async getCaptcha() {
+    public async getCaptcha() {
         return this.authService.generateCaptcha();
     }
 }

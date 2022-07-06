@@ -6,20 +6,20 @@ export class RegisterUserDto {
     @ApiProperty({
         description: '用户名',
     })
-    userName: string;
+    readonly userName: string;
     @IsNotEmpty()
     @ApiProperty({
         description: '密码',
     })
-    passWord: string;
+    readonly passWord: string;
     @IsNotEmpty()
     @ApiProperty({
         description: '邮箱',
     })
-    email: string;
+    readonly email: string;
     @IsNotEmpty()
     @ApiProperty({
         description: '昵称',
     })
-    nikeName: string;
+    readonly nikeName: string;
 }
