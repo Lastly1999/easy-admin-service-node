@@ -1,5 +1,5 @@
 # 获取node镜像
-FROM node:latest
+FROM node:16
 
 # 创建工作目录
 RUN mkdir app
