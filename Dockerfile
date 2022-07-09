@@ -1,14 +1,14 @@
 # 获取node镜像
 FROM node:14
 
-# 创建工作目录
-RUN mkdir easy-admin-service-node
-
-# 设置工作目录
-WORKDIR /easy-admin-service-node
-
-# 拷贝目录
-COPY . /easy-admin-service-node
+## 创建工作目录
+#RUN mkdir easy-admin-service-node
+#
+## 设置工作目录
+#WORKDIR /easy-admin-service-node
+#
+## 拷贝目录
+#COPY . /easy-admin-service-node
 
 # 镜像的维护者
 MAINTAINER zhangzw
