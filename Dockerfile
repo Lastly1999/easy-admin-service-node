@@ -23,7 +23,7 @@ RUN npm --registry i -g pm2
 RUN npm run build
 
 # 容器端口
-EXPOSE 3000
+EXPOSE 5000
 
 # 启动命令
 CMD ["pm2-runtime", "start", "dist/src/main.js", "-i", "2"]
