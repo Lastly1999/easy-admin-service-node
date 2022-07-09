@@ -2,13 +2,13 @@
 FROM node:14
 
 # 创建工作目录
-RUN mkdir app
+RUN mkdir easy-admin-service-node
 
 # 设置工作目录
-WORKDIR /app
+WORKDIR /easy-admin-service-node
 
 # 拷贝目录
-COPY . /app
+COPY . /easy-admin-service-node
 
 # 镜像的维护者
 MAINTAINER zhangzw
