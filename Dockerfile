@@ -13,14 +13,17 @@ COPY . /app
 # 镜像的维护者
 MAINTAINER zhangzw
 
-# 安装npm包
-RUN npm --registry i
+# 安装pnpm包
+RUN npm i -g pnpm
+
+# 安装依赖
+RUN pnpm install
 
 # 安装全局pm2
 RUN npm --registry i -g pm2
 
 # 编译
-RUN npm run build
+RUN pnpm run build
 
 # 容器端口
 EXPOSE 5000
