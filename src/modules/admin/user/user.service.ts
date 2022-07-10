@@ -1,17 +1,18 @@
 import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
-import { Repository } from 'typeorm';
-import { UserEntity } from '../../../entity/user.entity';
+import { EntityManager, Repository } from 'typeorm';
 import { FindUserDto } from '../auth/dto/find-user.dto';
-import { InjectRepository } from '@nestjs/typeorm';
-import { CreateUserDto } from './dto/create-user.dto';
+import { InjectEntityManager, InjectRepository } from '@nestjs/typeorm';
 import { RegisterUserDto } from './dto/register-user.dto';
 import * as bcrypt from 'bcrypt';
+import SysUser from '../../../entity/admin/sys-user.entity';
+import SysUserRoleEntity from '../../../entity/admin/sys-user-role.entity';
 
 @Injectable()
 export class UserService {
     constructor(
-        @InjectRepository(UserEntity)
-        private readonly userRepository: Repository<UserEntity>,
+        @InjectRepository(SysUser)
+        private readonly userRepository: Repository<SysUser>,
+        @InjectEntityManager() private entityManager: EntityManager,
     ) {}
 
     /**
@@ -22,28 +23,31 @@ export class UserService {
         // 用户存在查询
         const existUser = await this.userRepository.findOne({
             where: {
-                userName: registerUserDto.userName,
+                username: registerUserDto.userName,
             },
         });
         if (existUser) throw new HttpException('用户已存在', HttpStatus.OK);
-        // 开始生成账户
-        const saltOrRounds = 10;
-        const hashPassWord = await bcrypt.hash(registerUserDto.passWord, saltOrRounds);
-        // 插入
-        await this.userRepository
-            .createQueryBuilder()
-            .insert()
-            .into(UserEntity)
-            .values([
-                {
-                    userName: registerUserDto.userName,
-                    passWord: hashPassWord,
-                    email: registerUserDto.email,
-                    nikeName: registerUserDto.nikeName,
-                },
-            ])
-            .execute();
-        return null;
+
+        // 开始注册事务
+        await this.entityManager.transaction(async (manage) => {
+            const saltOrRounds = 10;
+            const hashPassWord = await bcrypt.hash(registerUserDto.passWord, saltOrRounds);
+            // 创建用户
+            const user = manage.create(SysUser, {
+                username: registerUserDto.userName,
+                password: hashPassWord,
+                email: registerUserDto.email,
+                nickName: registerUserDto.nikeName,
+                name: registerUserDto.name,
+                departmentId: registerUserDto.depId,
+            });
+            // 保存操作
+            const saveResult = await manage.save(user);
+            // 插入用户角色
+            const { roles } = registerUserDto;
+            const insertRoles = roles.map((item) => ({ roleId: item, userId: saveResult.id }));
+            await manage.insert(SysUserRoleEntity, insertRoles);
+        });
     }
 
     /**
@@ -64,24 +68,6 @@ export class UserService {
             throw new HttpException('暂无用户', HttpStatus.INTERNAL_SERVER_ERROR);
         }
         return userInfo;
-    }
-
-    /**
-     * 新增用户
-     * @param createUserDto
-     */
-    public async addUser(createUserDto: CreateUserDto) {
-        return await this.userRepository
-            .createQueryBuilder('user')
-            .insert()
-            .into(UserEntity)
-            .values({
-                userName: createUserDto.userName,
-                passWord: createUserDto.passWord,
-                email: createUserDto.email,
-                nikeName: createUserDto.nikeName,
-            })
-            .execute();
     }
 
     /**

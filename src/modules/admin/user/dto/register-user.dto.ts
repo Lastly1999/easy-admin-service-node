@@ -9,6 +9,11 @@ export class RegisterUserDto {
     readonly userName: string;
     @IsNotEmpty()
     @ApiProperty({
+        description: '姓名',
+    })
+    readonly name: string;
+    @IsNotEmpty()
+    @ApiProperty({
         description: '密码',
     })
     readonly passWord: string;
@@ -22,4 +27,14 @@ export class RegisterUserDto {
         description: '昵称',
     })
     readonly nikeName: string;
+    @IsNotEmpty()
+    @ApiProperty({
+        description: '部门id',
+    })
+    readonly depId: number;
+    @IsNotEmpty()
+    @ApiProperty({
+        description: '角色id',
+    })
+    roles: number[];
 }

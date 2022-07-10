@@ -8,7 +8,7 @@ export default () => ({
         password: 'Chen1027',
         database: 'easy_cms',
         entities: ['dist/**/*.entity{.ts,.js}'],
-        synchronize: true,
+        synchronize: false,
     },
     svgcaptcha: {
         inverse: false, // 翻转颜色

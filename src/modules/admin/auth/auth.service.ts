@@ -5,17 +5,16 @@ import * as svgCaptcha from 'svg-captcha';
 import { ConfigService } from '@nestjs/config';
 import { AuthRedisConstant } from './auth-redis.constant';
 import { InjectRepository } from '@nestjs/typeorm';
-import { UserEntity } from '../../../entity/user.entity';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
-import { JwtConstant } from './jwt.constant';
+import SysUser from '../../../entity/admin/sys-user.entity';
 
 @Injectable()
 export class AuthService {
     constructor(
-        @InjectRepository(UserEntity)
-        private readonly userRepository: Repository<UserEntity>,
+        @InjectRepository(SysUser)
+        private readonly userRepository: Repository<SysUser>,
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
@@ -28,15 +27,15 @@ export class AuthService {
     public async validateUser(findUserDto: FindUserDto): Promise<any> {
         const user = await this.userRepository.findOne({
             where: {
-                userName: findUserDto.userName,
+                username: findUserDto.userName,
             },
         });
-        const hasExistUser = user && (await bcrypt.compare(findUserDto.passWord, user.passWord));
+        const hasExistUser = user && (await bcrypt.compare(findUserDto.passWord, user.password));
         if (hasExistUser) {
             const token = this.generateToken({ id: user.id });
             return { token, userInfo: user };
         } else {
-            throw new HttpException('登录失败,请检查s用户名或密码是否正确', HttpStatus.INTERNAL_SERVER_ERROR);
+            throw new HttpException('登录失败,请检查用户名或密码是否正确', HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -92,7 +91,20 @@ export class AuthService {
      * 根据JWT解析的ID校验用户
      * @param payload
      */
-    public async validateUserByJwt(payload: { id: number }): Promise<UserEntity> {
+    public async validateUserByJwt(payload: { id: number }): Promise<SysUser> {
         return await this.userRepository.findOne({ where: { id: payload.id } });
+    }
+
+    /**
+     * 获取用户权限菜单
+     */
+    public async findUserAuthMenus(payload: { id: number }) {
+        return await this.userRepository
+            .createQueryBuilder('user')
+            .where('user.id = :id', {
+                id: payload.id,
+            })
+            .innerJoinAndSelect('user.roles', 'roles')
+            .getOne();
     }
 }
