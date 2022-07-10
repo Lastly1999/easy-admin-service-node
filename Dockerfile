@@ -20,7 +20,7 @@ RUN npm i -g pnpm@6
 RUN pnpm install
 
 # 安装全局pm2
-RUN npm --registry i -g pm2
+RUN pnpm add -g pm2
 
 # 编译
 RUN pnpm run build
