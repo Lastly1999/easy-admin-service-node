@@ -14,7 +14,7 @@ COPY . /app
 MAINTAINER zhangzw
 
 # 安装pnpm包
-RUN npm i -g pnpm
+RUN npm i -g pnpm@6
 
 # 安装依赖
 RUN pnpm install
