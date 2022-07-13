@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import {Logger, Module} from '@nestjs/common';
 import { TypeOrmModule, TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 
@@ -15,6 +15,7 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
                     database: configService.get<string>('database.database'),
                     entities: configService.get<string[]>('database.entities'),
                     synchronize: configService.get<boolean>('database.synchronize'),
+                    logging:true
                 } as TypeOrmModuleOptions),
             inject: [ConfigService],
         }),

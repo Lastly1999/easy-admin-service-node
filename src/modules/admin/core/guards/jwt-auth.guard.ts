@@ -1,7 +1,7 @@
 import { AuthGuard } from '@nestjs/passport';
-import { UserService } from '../user/user.service';
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
-import { AuthService } from './auth.service';
+import { UserService } from '../../user/user.service';
+import {ExecutionContext, Logger, UnauthorizedException} from '@nestjs/common';
+import { AuthService } from '../../auth/auth.service';
 
 export class JwtAuthGuard extends AuthGuard('jwt') {
     constructor(private readonly authService: AuthService, private readonly userService: UserService) {
@@ -23,7 +23,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
             const rtUserId = this.authService.verifyToken(refreshToken);
             if (!rtUserId) throw new UnauthorizedException('当前登录已过期，请重新登录');
             // 查询用户
-            const user = await this.userService.findById(rtUserId);
+            const user = await this.userService.findUserById(rtUserId);
             // 续签操作
             if (user) {
                 const tokens = await this.authService.generateToken({ id: rtUserId });
@@ -37,6 +37,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
                 throw new UnauthorizedException('用户不存在');
             }
         } catch (e) {
+            Logger.error(e)
             return false;
         }
     }

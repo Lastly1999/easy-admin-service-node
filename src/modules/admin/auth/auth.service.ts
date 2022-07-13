@@ -3,12 +3,15 @@ import { Cache } from 'cache-manager';
 import { FindUserDto } from './dto/find-user.dto';
 import * as svgCaptcha from 'svg-captcha';
 import { ConfigService } from '@nestjs/config';
-import { AuthRedisConstant } from './auth-redis.constant';
+import { AuthRedisConstant } from '../admin.constant';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import SysUser from '../../../entity/admin/sys-user.entity';
+import {MenuService} from "../menu/menu.service";
+import {UserService} from "../user/user.service";
+import {RoleService} from "../role/role.service";
 
 @Injectable()
 export class AuthService {
@@ -18,6 +21,9 @@ export class AuthService {
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
+        private readonly menuService:MenuService,
+        private readonly userService:UserService,
+        private readonly roleService:RoleService
     ) {}
 
     /**
@@ -99,12 +105,7 @@ export class AuthService {
      * 获取用户权限菜单
      */
     public async findUserAuthMenus(payload: { id: number }) {
-        return await this.userRepository
-            .createQueryBuilder('user')
-            .where('user.id = :id', {
-                id: payload.id,
-            })
-            .innerJoinAndSelect('user.roles', 'roles')
-            .getOne();
+        const userRoleIds = await this.roleService.getUserRoleIds(payload.id)
+        return await this.menuService.findAuthMenusByRoleId(userRoleIds)
     }
 }
