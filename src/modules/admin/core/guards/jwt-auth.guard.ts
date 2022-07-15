@@ -1,6 +1,6 @@
 import { AuthGuard } from '@nestjs/passport';
 import { UserService } from '../../user/user.service';
-import {ExecutionContext, Logger, UnauthorizedException} from '@nestjs/common';
+import { ExecutionContext, Logger, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from '../../auth/auth.service';
 
 export class JwtAuthGuard extends AuthGuard('jwt') {
@@ -37,7 +37,7 @@ export class JwtAuthGuard extends AuthGuard('jwt') {
                 throw new UnauthorizedException('用户不存在');
             }
         } catch (e) {
-            Logger.error(e)
+            Logger.error(e);
             return false;
         }
     }

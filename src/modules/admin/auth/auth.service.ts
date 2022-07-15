@@ -9,9 +9,10 @@ import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import SysUser from '../../../entity/admin/sys-user.entity';
-import {MenuService} from "../menu/menu.service";
-import {UserService} from "../user/user.service";
-import {RoleService} from "../role/role.service";
+import { MenuService } from '../menu/menu.service';
+import { UserService } from '../user/user.service';
+import { RoleService } from '../role/role.service';
+import { UtilService } from 'src/modules/common/util/util.service';
 
 @Injectable()
 export class AuthService {
@@ -21,9 +22,10 @@ export class AuthService {
         @Inject(CACHE_MANAGER) private cacheManager: Cache,
         private readonly configService: ConfigService,
         private readonly jwtService: JwtService,
-        private readonly menuService:MenuService,
-        private readonly userService:UserService,
-        private readonly roleService:RoleService
+        private readonly menuService: MenuService,
+        private readonly userService: UserService,
+        private readonly roleService: RoleService,
+        private readonly utilService: UtilService,
     ) {}
 
     /**
@@ -105,7 +107,9 @@ export class AuthService {
      * 获取用户权限菜单
      */
     public async findUserAuthMenus(payload: { id: number }) {
-        const userRoleIds = await this.roleService.getUserRoleIds(payload.id)
-        return await this.menuService.findAuthMenusByRoleId(userRoleIds)
+        const userRoleIds = await this.roleService.getUserRoleIds(payload.id);
+        const roleMenus = await this.menuService.findAuthMenusByRoleId(userRoleIds);
+        const asyncMenus = this.utilService.toTree(roleMenus);
+        return asyncMenus;
     }
 }

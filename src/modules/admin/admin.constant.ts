@@ -8,7 +8,6 @@ export enum JwtConstant {
     JWT_SALT = 'abcdefgihjdsajaskdk@!!sad#$',
 }
 
-
 /**
  * 授权redis 命名空间 枚举
  */
