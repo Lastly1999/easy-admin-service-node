@@ -20,10 +20,11 @@ import { JwtConstant } from './admin.constant';
 import { AuthController } from './auth/auth.controller';
 import { AuthService } from './auth/auth.service';
 import { JwtStrategy } from './auth/jwt.strategy';
+import SysDepartment from '../../entity/admin/sys-department.entity';
 
 @Module({
     imports: [
-        TypeOrmModule.forFeature([SysUser, SysMenu, SysUserRoleEntity, SysRole, sysUserRoleEntity, SysMenu, SysRoleMenu]),
+        TypeOrmModule.forFeature([SysUser, SysMenu, SysUserRoleEntity, SysRole, sysUserRoleEntity, SysMenu, SysRoleMenu, SysDepartment]),
         PassportModule.register({ defaultStrategy: 'jwt' }),
         JwtModule.register({
             secret: JwtConstant.JWT_SALT,
