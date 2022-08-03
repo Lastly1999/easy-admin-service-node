@@ -3,12 +3,15 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { CreateRoleDto } from './dto/create-role.dto';
 import SysRole from '../../../entity/admin/sys-role.entity';
+import SysUserRoleEntity from 'src/entity/admin/sys-user-role.entity';
 
 @Injectable()
 export class RoleService {
     constructor(
         @InjectRepository(SysRole)
         private readonly roleRepository: Repository<SysRole>,
+        @InjectRepository(SysUserRoleEntity)
+        private readonly sysUserRoleEntity: Repository<SysUserRoleEntity>,
     ) {}
 
     /**
@@ -52,5 +55,24 @@ export class RoleService {
                 name: roleName,
             },
         });
+    }
+
+    /**
+     * 查询用户角色的id列表
+     * @param userId
+     * @returns
+     */
+    public async getUserRoleIds(userId: number): Promise<number[]> {
+        const userRoles = await this.sysUserRoleEntity
+            .createQueryBuilder('sysUserRole')
+            .where('sysUserRole.userId = :id', {
+                id: userId,
+            })
+            .getMany();
+        if (userRoles) {
+            const roleIds = userRoles.map((item) => item.roleId);
+            return roleIds;
+        }
+        return [];
     }
 }

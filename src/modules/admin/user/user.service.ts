@@ -74,7 +74,7 @@ export class UserService {
      * 查询用户信息 (userId)
      * @param id
      */
-    public async findById(id: number) {
+    public async findUserById(id: number) {
         return await this.userRepository.findOne({
             where: { id },
         });

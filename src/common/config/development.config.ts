@@ -6,7 +6,7 @@ export default () => ({
         port: 3306,
         username: 'root',
         password: 'Chen1027',
-        database: 'easy_cms',
+        database: 'easy_erp',
         entities: ['dist/**/*.entity{.ts,.js}'],
         synchronize: false,
     },
