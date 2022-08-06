@@ -33,17 +33,21 @@ export class AuthService {
      * @param findUserDto
      */
     public async validateUser(findUserDto: FindUserDto): Promise<any> {
-        const user = await this.userRepository.findOne({
-            where: {
-                username: findUserDto.userName,
-            },
-        });
-        const hasExistUser = user && (await bcrypt.compare(findUserDto.passWord, user.password));
-        if (hasExistUser) {
-            const token = this.generateToken({ id: user.id });
-            return { token, userInfo: user };
-        } else {
-            throw new HttpException('登录失败,请检查用户名或密码是否正确', HttpStatus.INTERNAL_SERVER_ERROR);
+        try {
+            const user = await this.userRepository.findOne({
+                where: {
+                    username: findUserDto.userName,
+                },
+            });
+            const hasExistUser = user && (await bcrypt.compare(findUserDto.passWord, user.password));
+            if (hasExistUser) {
+                const token = this.generateToken({ id: user.id });
+                return { token, userInfo: user };
+            } else {
+                throw new HttpException('登录失败,请检查用户名或密码是否正确', HttpStatus.INTERNAL_SERVER_ERROR);
+            }
+        } catch (err) {
+            throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
@@ -109,7 +113,6 @@ export class AuthService {
     public async findUserAuthMenus(payload: { id: number }) {
         const userRoleIds = await this.roleService.getUserRoleIds(payload.id);
         const roleMenus = await this.menuService.findAuthMenusByRoleId(userRoleIds);
-        const asyncMenus = this.utilService.toTree(roleMenus);
-        return asyncMenus;
+        return this.utilService.toTree(roleMenus);
     }
 }
