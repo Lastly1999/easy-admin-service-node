@@ -9,4 +9,6 @@ export class CreateUserDto {
     readonly email: string;
     @IsNotEmpty()
     readonly nikeName: string;
+    @IsNotEmpty()
+    readonly phone: string;
 }

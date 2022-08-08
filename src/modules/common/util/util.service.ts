@@ -22,6 +22,7 @@ export class UtilService {
             if (parent) {
                 (parent.children || (parent.children = [])).push(item);
             } else {
+                item.children = [];
                 //如果没有在map中找到对应的索引ID,那么直接把 当前的item添加到 val结果集中，作为顶级
                 val.push(item);
             }

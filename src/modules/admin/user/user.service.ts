@@ -8,6 +8,9 @@ import SysUser from '../../../entity/admin/sys-user.entity';
 import SysUserRoleEntity from '../../../entity/admin/sys-user-role.entity';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { FindUserListInterface } from './interfaces/find-user-list.interface';
+import { FindUserListDto } from './dto/find-user-list.dto';
+import { FindUserInfoInterface } from './interfaces/find-user-info.interface';
+import { RoleService } from '../role/role.service';
 
 @Injectable()
 export class UserService {
@@ -15,6 +18,7 @@ export class UserService {
         @InjectRepository(SysUser)
         private readonly userRepository: Repository<SysUser>,
         @InjectEntityManager() private entityManager: EntityManager,
+        private readonly roleService: RoleService,
     ) {}
 
     /**
@@ -39,17 +43,23 @@ export class UserService {
     /**
      * 获取系统用户列表
      */
-    public async getUserList() {
+    public async getUserList(findUserListDto: FindUserListDto) {
         const result = await this.userRepository
             .createQueryBuilder('user')
+            .innerJoinAndSelect('sys_department', 'dept', 'dept.id = user.department_id')
             .innerJoinAndSelect('sys_user_role', 'user_role', 'user_role.user_id = user.id')
             .innerJoinAndSelect('sys_role', 'role', 'role.id = user_role.role_id')
+            .where(!findUserListDto?.depId ? '1 = 1' : 'user.department_id = :depId', {
+                depId: findUserListDto.depId,
+            })
             .getRawMany();
         const userList: FindUserListInterface[] = [];
         result.map((item) => {
             const index: number = userList.findIndex((listItem) => listItem.userId === item.user_id);
             if (index < 0) {
                 userList.push({
+                    email: item.user_email,
+                    departmentName: item.dept_name,
                     departmentId: item.user_department_id,
                     phone: item.user_phone,
                     remark: item.user_remark,
@@ -97,26 +107,24 @@ export class UserService {
      * @param updateUserDto
      */
     public async updateUserInfo(userId: string, updateUserDto: UpdateUserDto) {
-        try {
-            const userExist = await this.findUserById(Number(userId));
-            if (!userExist) {
-                throw new HttpException('该用户不存在', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-            const result = await this.userRepository.update(userId, {
+        await this.entityManager.transaction(async (manage) => {
+            await manage.update(SysUser, userId, {
                 username: updateUserDto.userName,
                 email: updateUserDto.email,
                 nickName: updateUserDto.nikeName,
                 name: updateUserDto.name,
+                departmentId: updateUserDto.depId,
+                phone: updateUserDto.phone,
             });
-            if (result.affected > 0) {
-                return null;
-            } else {
-                throw new HttpException('新增失败', HttpStatus.INTERNAL_SERVER_ERROR);
-            }
-        } catch (err) {
-            throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        // return this.userRepository.update(userId, updateUserDto);
+            // 删除角色关系
+            await manage.delete(SysUserRoleEntity, { userId });
+            // 生成角色用户映射关系
+            const insertRoles = updateUserDto.roles.map((item) => ({
+                userId: Number(userId),
+                roleId: item,
+            }));
+            await manage.insert(SysUserRoleEntity, insertRoles);
+        });
     }
 
     /**
@@ -135,7 +143,7 @@ export class UserService {
         // 开始注册事务
         await this.entityManager.transaction(async (manage) => {
             const saltOrRounds = 10;
-            const hashPassWord = await bcrypt.hash(registerUserDto.passWord, saltOrRounds);
+            const hashPassWord = await bcrypt.hash(registerUserDto?.passWord || '1234', saltOrRounds);
             // 创建用户
             const user = manage.create(SysUser, {
                 username: registerUserDto.userName,
@@ -144,6 +152,7 @@ export class UserService {
                 nickName: registerUserDto.nikeName,
                 name: registerUserDto.name,
                 departmentId: registerUserDto.depId,
+                phone: registerUserDto.phone,
             });
             // 保存操作
             const saveResult = await manage.save(user);
@@ -178,9 +187,30 @@ export class UserService {
      * 查询用户信息 (userId)
      * @param id
      */
-    public async findUserById(id: number) {
-        return await this.userRepository.findOne({
-            where: { id },
-        });
+    public async findUserById(id: number): Promise<FindUserInfoInterface> {
+        try {
+            const user = await this.userRepository.findOne({
+                where: { id },
+            });
+            // 查询用户角色列表
+            const userRoles = await this.roleService.findUserRoles(user.id);
+            const roleIds: number[] = userRoles.map((item) => item.roleId);
+            const resultInfo: FindUserInfoInterface = {
+                depId: user.departmentId,
+                email: user.email,
+                headImg: user.headImg,
+                id: user.id,
+                name: user.name,
+                nickName: user.nickName,
+                phone: user.phone,
+                remark: user.remark,
+                status: user.status,
+                userName: user.username,
+                roles: roleIds,
+            };
+            return resultInfo;
+        } catch (err) {
+            throw new HttpException('内部服务异常', HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 }

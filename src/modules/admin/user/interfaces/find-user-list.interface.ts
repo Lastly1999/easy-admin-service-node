@@ -1,7 +1,9 @@
 export class FindUserListInterface {
     userId: number;
+    departmentName: string;
     departmentId: number;
     name: string;
+    email: string;
     userName: string;
     nickName: string;
     headImg: string;
