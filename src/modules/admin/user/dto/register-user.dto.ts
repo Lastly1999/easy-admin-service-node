@@ -12,7 +12,6 @@ export class RegisterUserDto {
         description: '姓名',
     })
     readonly name: string;
-    @IsNotEmpty()
     @ApiProperty({
         description: '密码',
     })
@@ -37,4 +36,8 @@ export class RegisterUserDto {
         description: '角色id',
     })
     roles: number[];
+    @ApiProperty({
+        description: '手机号',
+    })
+    phone: string;
 }

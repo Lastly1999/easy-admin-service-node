@@ -114,4 +114,12 @@ export class RoleService {
     public async createRoleMenus(roleId: string, createRoleMenusDto: CreateRoleMenusDto) {
         return this.menuService.createRoleMenus(Number(roleId), createRoleMenusDto.menuIds);
     }
+
+    /**
+     * 查询用户角色
+     * @param userId
+     */
+    public async findUserRoles(userId: number) {
+        return await this.sysUserRoleEntity.createQueryBuilder('user_role').where('user_role.user_id = :userId', { userId }).getMany();
+    }
 }
