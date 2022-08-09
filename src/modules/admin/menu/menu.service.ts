@@ -4,6 +4,8 @@ import SysMenu from '../../../entity/admin/sys-menu.entity';
 import { Repository } from 'typeorm';
 import SysRoleMenu from '../../../entity/admin/sys-role-menu.entity';
 import { UtilService } from '../../common/util/util.service';
+import { GetMenusDto } from './dto/get-menus.dto';
+import { CreateMenuDto } from './dto/create-menu.dto';
 
 @Injectable()
 export class MenuService {
@@ -43,7 +45,7 @@ export class MenuService {
     /**
      * 获取系统权限菜单
      */
-    public async getMenuList() {
+    public async getMenuList(): Promise<GetMenusDto[]> {
         const menuList = await this.sysMenuRepository.find();
         return this.utilService.toTree(menuList);
     }
@@ -61,5 +63,27 @@ export class MenuService {
         } catch (err) {
             throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
         }
+    }
+
+    /**
+     * 创建系统菜单
+     * @param createMenuDto
+     */
+    public async createMenu(createMenuDto: CreateMenuDto) {
+        return await this.sysMenuRepository
+            .createQueryBuilder('sys_menu')
+            .insert()
+            .into(SysMenu)
+            .values({
+                icon: createMenuDto.menuIcon,
+                isShow: createMenuDto.menuIsShow,
+                name: createMenuDto.menuName,
+                orderNum: createMenuDto.menuOrderNum,
+                parentId: createMenuDto.menuPid,
+                perms: createMenuDto.menuPerms,
+                router: createMenuDto.menuRouter,
+                type: createMenuDto.menuType,
+            })
+            .execute();
     }
 }
