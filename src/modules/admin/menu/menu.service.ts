@@ -6,6 +6,7 @@ import SysRoleMenu from '../../../entity/admin/sys-role-menu.entity';
 import { UtilService } from '../../common/util/util.service';
 import { GetMenusDto } from './dto/get-menus.dto';
 import { CreateMenuDto } from './dto/create-menu.dto';
+import { UpdateMenuDto } from './dto/update-menu.dto';
 
 @Injectable()
 export class MenuService {
@@ -70,20 +71,59 @@ export class MenuService {
      * @param createMenuDto
      */
     public async createMenu(createMenuDto: CreateMenuDto) {
-        return await this.sysMenuRepository
-            .createQueryBuilder('sys_menu')
-            .insert()
-            .into(SysMenu)
-            .values({
-                icon: createMenuDto.menuIcon,
-                isShow: createMenuDto.menuIsShow,
-                name: createMenuDto.menuName,
-                orderNum: createMenuDto.menuOrderNum,
-                parentId: createMenuDto.menuPid,
-                perms: createMenuDto.menuPerms,
-                router: createMenuDto.menuRouter,
-                type: createMenuDto.menuType,
-            })
-            .execute();
+        try {
+            await this.sysMenuRepository
+                .createQueryBuilder('sys_menu')
+                .insert()
+                .into(SysMenu)
+                .values({
+                    icon: createMenuDto.menuIcon,
+                    isShow: createMenuDto.menuIsShow || false,
+                    name: createMenuDto.menuName,
+                    orderNum: createMenuDto.menuOrderNum,
+                    parentId: createMenuDto.menuPid,
+                    perms: createMenuDto.menuPerms,
+                    router: createMenuDto.menuRouter,
+                    type: createMenuDto.menuType,
+                })
+                .execute();
+            return null;
+        } catch (err) {
+            throw new HttpException(err, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+    /**
+     * 更新菜单启用状态
+     * @param menuId
+     */
+    public async deleteMenuById(menuId: string) {
+        await this.sysMenuRepository.delete(menuId);
+    }
+
+    /**
+     * 获取系统菜单详情
+     * @param menuId
+     */
+    public async getMenuInfoById(menuId: string) {
+        return await this.sysMenuRepository.findOne({ where: { id: Number(menuId) } });
+    }
+
+    /**
+     * 更新系统菜单信息
+     * @param menuId
+     * @param updateMenuDto
+     */
+    public async updateMenu(menuId: string, updateMenuDto: UpdateMenuDto) {
+        return await this.sysMenuRepository.update(menuId, {
+            icon: updateMenuDto.menuIcon,
+            isShow: updateMenuDto.menuIsShow,
+            name: updateMenuDto.menuName,
+            orderNum: updateMenuDto.menuOrderNum,
+            perms: updateMenuDto.menuPerms,
+            router: updateMenuDto.menuRouter,
+            type: updateMenuDto.menuType,
+            updatedAt: new Date(),
+        });
     }
 }

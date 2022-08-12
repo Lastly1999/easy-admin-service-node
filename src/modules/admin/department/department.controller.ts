@@ -2,7 +2,6 @@ import { Body, Controller, Delete, Get, Param, Put } from '@nestjs/common';
 import { DepartmentService } from './department.service';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateDepartmentDto } from './dto/create-department.dto';
-import { UtilService } from '../../common/util/util.service';
 
 @Controller('department')
 @ApiTags('部门')
