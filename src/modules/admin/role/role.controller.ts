@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, Put } from "@nestjs/common";
+import { Body, Controller, Get, Param, Post, Put } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -17,6 +17,11 @@ export class RoleController {
     @Post()
     public async list() {
         return await this.roleService.getRoleList();
+    }
+
+    @Get(':roleId')
+    public async info(@Param('roleId') roleId: string) {
+        return await this.roleService.getRoleInfoById(roleId);
     }
 
     @Get('/menu/:roleId')

@@ -4,14 +4,14 @@ import { ApiProperty } from '@nestjs/swagger';
 export class CreateRoleDto {
     @IsNotEmpty()
     @ApiProperty({
-        description: '用户名称',
+        description: '添加人',
     })
-    readonly userName: string;
+    userId: number;
     @IsNotEmpty()
     @ApiProperty({
-        description: '用户id',
+        description: '标识',
     })
-    readonly userId: string;
+    name: string;
     @IsNotEmpty()
     @ApiProperty({
         description: '角色名称',
@@ -22,4 +22,6 @@ export class CreateRoleDto {
         description: '备注',
     })
     readonly roleRemark: string;
+    readonly roleDepIds: number[];
+    readonly roleMenuIds: number[];
 }
