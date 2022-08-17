@@ -85,19 +85,6 @@ export class UserService {
                 });
             }
         });
-        // const userList: FindUserListInterface[] = result.map((item) => ({
-        //     departmentId: item.user_department_id,
-        //     phone: item.user_phone,
-        //     remark: item.user_remark,
-        //     status: item.user_status,
-        //     userName: item.user_username,
-        //     nickName: item.user_nick_name,
-        //     userId: item.user_id,
-        //     name: item.user_name,
-        //     headImg: item.user_head_img,
-        //     createdAt: item.user_created_at,
-        //     updatedAt: item.user_updated_at,
-        // }));
         return userList;
     }
 

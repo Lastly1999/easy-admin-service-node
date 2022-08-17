@@ -10,6 +10,7 @@ import { CreateRoleMenusDto } from './dto/create-role-menus.dto';
 import SysRoleMenu from '../../../entity/admin/sys-role-menu.entity';
 import SysRoleDepartment from '../../../entity/admin/sys-role-department.entity';
 import { GetRoleInfoDto } from './dto/get-role-info.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
 
 @Injectable()
 export class RoleService {
@@ -92,12 +93,13 @@ export class RoleService {
 
     /**
      * 查询角色 是否存在
-     * @param roleName
+     * @param key
+     * @param value
      */
-    public async findRoleByRoleName(roleName: string) {
+    public async findRoleByAny(key: string, value: string) {
         return await this.roleRepository.findOne({
             where: {
-                name: roleName,
+                [key]: value,
             },
         });
     }
@@ -159,5 +161,21 @@ export class RoleService {
             roleDepIds,
         };
         return roleInfoResult;
+    }
+
+    /**
+     * 更新角色信息
+     * @param roleId
+     * @param updateRoleDto
+     */
+    public async updateRoleInfo(roleId: string, updateRoleDto: UpdateRoleDto) {
+        // 存在判断
+        const existRole = await this.findRoleByAny('id', roleId);
+        if (!existRole) throw new HttpException('角色不存在', HttpStatus.INTERNAL_SERVER_ERROR);
+        await this.entityManager.transaction(async (manage) => {
+            await manage.update(SysRole, roleId, {
+                label: updateRoleDto.roleName,
+            });
+        });
     }
 }
