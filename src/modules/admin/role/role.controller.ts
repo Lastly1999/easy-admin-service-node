@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Patch, Post, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ApiTags } from '@nestjs/swagger';
@@ -38,5 +38,10 @@ export class RoleController {
     @Put('/menu/:roleId')
     public async createRoleMenus(@Param('roleId') roleId: string, @Body() createRoleMenusDto: CreateRoleMenusDto) {
         return await this.roleService.createRoleMenus(roleId, createRoleMenusDto);
+    }
+
+    @Delete(':roleId')
+    public async delete(@Param('roleId') roleId: string) {
+        return await this.roleService.deleteRoleById(roleId);
     }
 }

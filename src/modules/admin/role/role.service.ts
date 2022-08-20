@@ -173,9 +173,43 @@ export class RoleService {
         const existRole = await this.findRoleByAny('id', roleId);
         if (!existRole) throw new HttpException('角色不存在', HttpStatus.INTERNAL_SERVER_ERROR);
         await this.entityManager.transaction(async (manage) => {
+            // 更新角色信息
             await manage.update(SysRole, roleId, {
                 label: updateRoleDto.roleName,
+                name: updateRoleDto.name,
+                remark: updateRoleDto.roleRemark,
             });
+            // 先清空现在拥有的角色菜单项
+            await manage.delete(SysRoleMenu, { roleId });
+            // 新增权限角色菜单
+            const insertRoles = updateRoleDto.roleMenuIds.map((item) => ({
+                roleId: Number(roleId),
+                menuId: item,
+            }));
+            await manage.insert(SysRoleMenu, insertRoles);
+            // 删除目前关联部门项
+            await manage.delete(SysRoleDepartment, { roleId });
+            // 新增角色部门项目
+            const insertDepRoles = updateRoleDto.roleDepIds.map((item) => ({
+                roleId: Number(roleId),
+                departmentId: item,
+            }));
+            await manage.insert(SysRoleDepartment, insertDepRoles);
+        });
+    }
+
+    /**
+     * 删除角色
+     * @param roleId
+     */
+    public async deleteRoleById(roleId: string) {
+        await this.entityManager.transaction(async (manage) => {
+            // 删除角色关联的全部部门
+            await manage.delete(SysRoleDepartment, { roleId });
+            // 删除角色关联的全部菜单
+            await manage.delete(SysRoleMenu, { roleId });
+            // 删除角色
+            await manage.delete(SysRole, { id: roleId });
         });
     }
 }
