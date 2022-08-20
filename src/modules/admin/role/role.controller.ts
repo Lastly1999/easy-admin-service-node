@@ -1,8 +1,9 @@
-import { Body, Controller, Get, Param, Put } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Param, Patch, Post, Put } from '@nestjs/common';
 import { RoleService } from './role.service';
 import { CreateRoleDto } from './dto/create-role.dto';
 import { ApiTags } from '@nestjs/swagger';
 import { CreateRoleMenusDto } from './dto/create-role-menus.dto';
+import { UpdateRoleDto } from './dto/update-role.dto';
 
 @ApiTags('角色模块')
 @Controller('role')
@@ -14,9 +15,19 @@ export class RoleController {
         return await this.roleService.addRole(createRoleDto);
     }
 
-    @Get()
+    @Post()
     public async list() {
         return await this.roleService.getRoleList();
+    }
+
+    @Get(':roleId')
+    public async info(@Param('roleId') roleId: string) {
+        return await this.roleService.getRoleInfoById(roleId);
+    }
+
+    @Patch(':roleId')
+    public async update(@Param('roleId') roleId: string, @Body() updateRoleDto: UpdateRoleDto) {
+        return await this.roleService.updateRoleInfo(roleId, updateRoleDto);
     }
 
     @Get('/menu/:roleId')
@@ -27,5 +38,10 @@ export class RoleController {
     @Put('/menu/:roleId')
     public async createRoleMenus(@Param('roleId') roleId: string, @Body() createRoleMenusDto: CreateRoleMenusDto) {
         return await this.roleService.createRoleMenus(roleId, createRoleMenusDto);
+    }
+
+    @Delete(':roleId')
+    public async delete(@Param('roleId') roleId: string) {
+        return await this.roleService.deleteRoleById(roleId);
     }
 }

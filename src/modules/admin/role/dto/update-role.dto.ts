@@ -1,12 +1,7 @@
 import { IsNotEmpty } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateRoleDto {
-    @IsNotEmpty()
-    @ApiProperty({
-        description: '添加人',
-    })
-    userId: number;
+export class UpdateRoleDto {
     @IsNotEmpty()
     @ApiProperty({
         description: '标识',

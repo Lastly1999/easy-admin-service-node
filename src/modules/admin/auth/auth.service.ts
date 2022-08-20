@@ -113,6 +113,8 @@ export class AuthService {
     public async findUserAuthMenus(payload: { id: number }) {
         const userRoleIds = await this.roleService.getUserRoleIds(payload.id);
         const roleMenus = await this.menuService.findAuthMenusByRoleId(userRoleIds);
-        return this.utilService.toTree(roleMenus);
+        // 过滤非菜单对象
+        const newRoleMenusHasMenu = roleMenus.filter((item) => item.type !== 2);
+        return this.utilService.toTree(newRoleMenusHasMenu);
     }
 }
