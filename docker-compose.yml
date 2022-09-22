@@ -1,0 +1,26 @@
+version: '3.0'
+
+services:
+    redis: # redis
+      container_name: redis # 容器名称
+      image: daocloud.io/library/redis:6.0.3-alpine3.11 # 使用官方镜像
+        # 配置redis.conf方式启动
+        # 无需配置文件方式启动
+      command: redis-server --requirepass pwd123 --appendonly yes # 设置redis登录密码 pwd123
+      ports:
+          - 6379:6379 # 本机端口:容器端口
+      restart: on-failure # 自动重启
+      environment:
+          - TZ=Asia/Shanghai  # 解决容器 时区的问题
+      networks:
+          - net-service
+    mysql: # 数据库
+      container_name: mysql
+      image: daocloud.io/library/mysql:5.7 # 使用官方镜像
+      ports: 
+          - 3306:3306 # 本机端口:容器端口
+      restart: on-failure
+      environment: 
+          - MYSQL_ROOT_PASSWORD=Chen1027 # root用户密码
+      networks: 
+          - net-service                

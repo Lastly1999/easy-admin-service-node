@@ -21,7 +21,7 @@ export default () => ({
     },
     redis: {
         port: 6379,
-        host: '106.12.161.121',
+        host: '81.69.196.144',
         password: 'pwd123',
         db: 1,
     },

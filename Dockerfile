@@ -1,5 +1,5 @@
 # 基础镜像
-FROM node:16
+FROM keymetrics/pm2-docker-alpine:next
 
 # 创建一个应用目录
 WORKDIR /usr/src/app
@@ -8,16 +8,16 @@ WORKDIR /usr/src/app
 COPY package*.json ./
 
 # 安装应用依赖
-RUN npm install
+RUN npm i -g yarn
 
 # 安装完毕后复制当前目录所有文件到镜像目录里面
 COPY . . 
 
 # 执行npm run build 后生成dist目录
-RUN npm run build
+RUN yarn build
 
 # 安装pm2
-RUN npm i -g pm2
+RUN yarn add global pm2
 
 # 使用打包后的镜像
-CMD ["pm2","start","dist/main.js"]
+CMD ["pm2-runtime","start","dist/main.js"]
