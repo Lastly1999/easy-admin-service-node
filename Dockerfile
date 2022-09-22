@@ -1,5 +1,5 @@
 # 基础镜像
-FROM node:18-alpine
+FROM node:16
 
 # 创建一个应用目录
 WORKDIR /usr/src/app
