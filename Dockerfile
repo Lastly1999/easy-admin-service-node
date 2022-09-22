@@ -7,17 +7,17 @@ WORKDIR /usr/src/app
 # 这个星号通配符意思是复制package.json和package-lock.json,复制到当前应用目录
 COPY package*.json ./
 
-# 安装应用依赖
-RUN npm i -g yarn
-
 # 安装完毕后复制当前目录所有文件到镜像目录里面
 COPY . . 
 
-# 执行npm run build 后生成dist目录
-RUN yarn build
+# Install app dependencies
+ENV NPM_CONFIG_LOGLEVEL warn
+RUN npm install --production
 
-# 安装pm2
-RUN yarn add global pm2
+RUN ls -al -R
+
+# 执行npm run build 后生成dist目录
+RUN npm build
 
 # 使用打包后的镜像
-CMD ["pm2-runtime","start","dist/main.js"]
+CMD [ "pm2-runtime", "start", "pm2.json" ]
