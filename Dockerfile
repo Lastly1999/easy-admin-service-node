@@ -1,5 +1,5 @@
 # 基础镜像
-FROM keymetrics/pm2-docker-alpine:latest
+FROM keymetrics/pm2:latest-alpine
 
 # 创建一个应用目录
 WORKDIR /usr/src/app
