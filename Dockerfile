@@ -13,7 +13,10 @@ WORKDIR /usr/src/app
 COPY --chown=node:node package*.json ./
 
 # 使用npm ci来安装依赖而不是npm install
-RUN npm install
+RUN npm i -g pnpm
+
+# 使用pnpm安装依赖
+RUN pnpm i
 
 # 复制安装后的依赖包到当前目录下
 COPY --chown=node:node . .
@@ -37,13 +40,13 @@ COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modul
 COPY --chown=node:node . .
 
 # 执行打包命令
-RUN npm run build
+RUN pnpm run build
 
 # 设置生产环境变量
 ENV NODE_ENV production
 
 # 运行' npm ci '会删除现有的node_modules目录，并传入——only=production确保只安装了生产依赖项。这确保node_modules目录尽可能优化
-RUN npm ci --only=production && npm cache clean --force
+RUN pnpm ci --only=production && pnpm cache clean --force
 
 USER node
 
