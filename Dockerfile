@@ -17,7 +17,7 @@ RUN npm install --production
 RUN ls -al -R
 
 # 执行npm run build 后生成dist目录
-RUN npm build
+RUN npm run build
 
 # 使用打包后的镜像
 CMD [ "pm2-runtime", "start", "pm2.json" ]
