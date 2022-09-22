@@ -1,64 +1,26 @@
-###################
-# BUILD FOR LOCAL DEVELOPMENT
-###################
+# 基础镜像
+FROM node:18-alpine
 
-FROM node:16 As development
-
-# 创建应用目录
+# 创建一个应用目录
 WORKDIR /usr/src/app
 
-# 复制依赖清单到容器镜像里.
-# 这个星号通配符意思是复制package.json和package-lock.json,复制到当前应用目录.
-# 首先复制这个选项可以防止在每次代码更改时重新运行npm install.
-COPY --chown=node:node package*.json ./
+# 这个星号通配符意思是复制package.json和package-lock.json,复制到当前应用目录
+COPY package*.json ./
 
-# 使用npm ci来安装依赖而不是npm install
+# 安装pnpm
 RUN npm i -g pnpm
 
-# 使用pnpm安装依赖
-RUN pnpm i
+# 安装应用依赖
+RUN pnpm install
 
-# 复制安装后的依赖包到当前目录下
-COPY --chown=node:node . .
+# 安装完毕后复制当前目录所有文件到镜像目录里面
+COPY . . 
 
-# 使用指定的用户而不是root权限用户
-USER node
-
-###################
-# BUILD FOR PRODUCTION
-###################
-
-FROM node:16 As build
-
-WORKDIR /usr/src/app
-
-COPY --chown=node:node package*.json ./
-
-# 我们需要通过Nest CLI 来执行npm run build,这是个开发依赖，然后把安装后依赖全部复制到指定目录
-COPY --chown=node:node --from=development /usr/src/app/node_modules ./node_modules
-
-COPY --chown=node:node . .
-
-# 执行打包命令
+# 执行npm run build 后生成dist目录
 RUN pnpm run build
 
-# 设置生产环境变量
-ENV NODE_ENV production
+# 安装pm2
+RUN pnpm i -g pm2
 
-# 运行' npm ci '会删除现有的node_modules目录，并传入——only=production确保只安装了生产依赖项。这确保node_modules目录尽可能优化
-RUN pnpm ci --only=production && pnpm cache clean --force
-
-USER node
-
-###################
-# PRODUCTION
-###################
-
-FROM node:16 As production
-
-# 将生产依赖和打包后的文件复制到指定目录下
-COPY --chown=node:node --from=build /usr/src/app/node_modules ./node_modules
-COPY --chown=node:node --from=build /usr/src/app/dist ./dist
-
-# 启动服务
-CMD [ "node", "dist/main.js" ]
+# 使用打包后的镜像
+CMD ["pm2","start","dist/main.js"]
