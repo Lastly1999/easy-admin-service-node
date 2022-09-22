@@ -12,7 +12,7 @@ COPY . .
 
 # Install app dependencies
 ENV NPM_CONFIG_LOGLEVEL warn
-RUN npm install --production
+RUN npm config set registry https://registry.npmmirror.com && npm install --production
 
 RUN ls -al -R
 
