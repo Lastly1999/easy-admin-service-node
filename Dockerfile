@@ -13,7 +13,7 @@ WORKDIR /usr/src/app
 COPY --chown=node:node package*.json ./
 
 # 使用npm ci来安装依赖而不是npm install
-RUN npm ci
+RUN npm install
 
 # 复制安装后的依赖包到当前目录下
 COPY --chown=node:node . .
