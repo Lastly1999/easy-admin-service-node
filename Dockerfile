@@ -15,8 +15,6 @@ ENV NPM_CONFIG_LOGLEVEL warn
 
 RUN npm i pm2 -g
 
-RUN npm config set registry https://registry.npmmirror.com 
-
 RUN npm install
 
 RUN ls -al -R
