@@ -13,16 +13,16 @@ COPY . .
 # Install app dependencies
 ENV NPM_CONFIG_LOGLEVEL warn
 
-RUN npm i yarn -g
+RUN npm i pnpm -g
 
-RUN yarn config set registry https://registry.npmmirror.com 
+RUN pnpm config set registry https://registry.npmmirror.com 
 
-RUN yarn
+RUN pnpm install
 
 RUN ls -al -R
 
 # 执行npm run build 后生成dist目录
-RUN yarn build
+RUN pnpm run build
 
 # 使用打包后的镜像
 CMD [ "pm2-runtime", "start", "pm2.json" ]
