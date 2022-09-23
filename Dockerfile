@@ -1,5 +1,5 @@
 # 基础镜像
-FROM keymetrics/pm2:latest-alpine
+FROM node:16
 
 # 创建一个应用目录
 WORKDIR /usr/src/app
@@ -15,6 +15,8 @@ ENV NPM_CONFIG_LOGLEVEL warn
 
 RUN npm i pnpm -g
 
+RUN npm i pm2 -g
+
 RUN pnpm config set registry https://registry.npmmirror.com 
 
 RUN pnpm install
@@ -25,4 +27,4 @@ RUN ls -al -R
 RUN pnpm run build
 
 # 使用打包后的镜像
-CMD [ "pm2-runtime", "start", "pm2.json" ]
+CMD [ "pm2-runtime", "pm2.json" ]
