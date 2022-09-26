@@ -10,16 +10,11 @@ COPY package*.json ./
 # 安装完毕后复制当前目录所有文件到镜像目录里面
 COPY . . 
 
-# Install app dependencies
-ENV NPM_CONFIG_LOGLEVEL warn
-
 RUN npm i pnpm -g
 
 RUN npm i pm2 -g
 
-RUN pnpm config set registry https://registry.npmmirror.com 
-
-RUN pnpm install
+RUN npm install
 
 RUN ls -al -R
 
